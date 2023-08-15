@@ -4,6 +4,7 @@ import com.fintech.dabankapp.dto.*;
 import com.fintech.dabankapp.entity.AppUser;
 import com.fintech.dabankapp.repository.UserRepository;
 import com.fintech.dabankapp.service.EmailService;
+import com.fintech.dabankapp.service.TransactionService;
 import com.fintech.dabankapp.service.UserService;
 import com.fintech.dabankapp.util.AccountUtils;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import java.math.BigDecimal;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private final TransactionService transactionService;
     @Override
     public BankResponse createAccount(UserRequest userRequest) {
         if (userRepository.existsByEmail(userRequest.getEmail())){
@@ -108,6 +110,13 @@ public class UserServiceImpl implements UserService {
         AppUser userToCredit = userRepository.findByAccountNumber(request.getAccountNumber());
         userToCredit.setAccountBalance(userToCredit.getAccountBalance().add(request.getAmount()));
         AppUser creditedUser = userRepository.save(userToCredit);
+
+        TransactionDto transactionDto = TransactionDto.builder()
+                .transactionType("CREDIT")
+                .amount(request.getAmount())
+                .accountNumber(request.getAccountNumber())
+                .build();
+        transactionService.saveTransaction(transactionDto);
 
         return BankResponse.builder()
                 .responseCode(AccountUtils.ACCOUNT_CREDITED_CODE)
