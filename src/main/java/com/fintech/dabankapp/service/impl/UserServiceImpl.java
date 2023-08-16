@@ -155,6 +155,12 @@ public class UserServiceImpl implements UserService {
         userToDebit.setAccountBalance(userToDebit.getAccountBalance().subtract(request.getAmount()));
         AppUser debitedUser = userRepository.save(userToDebit);
 
+        TransactionDto transactionDto = TransactionDto.builder()
+                .transactionType("DEBIT")
+                .amount(request.getAmount())
+                .accountNumber(request.getAccountNumber())
+                .build();
+        transactionService.saveTransaction(transactionDto);
 
         return BankResponse.builder()
                 .responseCode(AccountUtils.ACCOUNT_DEBITED_CODE)
@@ -213,6 +219,13 @@ public class UserServiceImpl implements UserService {
         AppUser recipient = userRepository.findByAccountNumber(transferRequest.getRecipientAccountNumber());
         recipient.setAccountBalance(recipient.getAccountBalance().add(transferRequest.getAmount()));
         userRepository.save(recipient);
+
+        TransactionDto transactionDto = TransactionDto.builder()
+                .transactionType("CREDIT")
+                .amount(transferRequest.getAmount())
+                .accountNumber(transferRequest.getRecipientAccountNumber())
+                .build();
+        transactionService.saveTransaction(transactionDto);
 
         return BankResponse.builder()
                 .responseCode(AccountUtils.ACCOUNT_DEBITED_CODE)

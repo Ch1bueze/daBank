@@ -34,8 +34,8 @@ public class BankStatement {
         LocalDate end = LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE);
 
         List<Transaction> transactionList = transactionRepository.findAll().stream().filter(transaction -> transaction.getAccountNumber().equals(accountNumber))
-                .filter(transaction -> transaction.getCreatedAt().isAfter(start))
-                .filter(transaction -> transaction.getCreatedAt().isBefore(end)).toList();
+                .filter(transaction -> transaction.getCreatedAt().equals(start))
+                .filter(transaction -> transaction.getCreatedAt().equals(end)).toList();
 
         AppUser user = userRepository.findByAccountNumber(accountNumber);
         String accountName = user.getLastName() + " " + user.getFirstName() + " " + user.getOtherName();
